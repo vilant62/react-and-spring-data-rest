@@ -1,0 +1,43 @@
+name: BuildAndDeployApplication
+
+trigger:
+  - main
+
+pool:
+  vmImage: 'ubuntu-22.04'
+
+variables:
+  imageName: 'vilant/react-and-spring-rest'
+
+jobs:
+- job: Build
+  steps:
+    - task: Docker@2
+      inputs:
+        containerRegistry: dockerRegistryServiceConnection
+        repository: '$(imageName)'
+        command: buildAndPush
+        Dockerfile: '**/Dockerfile'
+        tags: |
+          $(Build.BuildId)
+          latest
+      displayName: Build Docker Image
+
+- job: Validation
+  condition: succeeded()
+  pool: server
+  steps:
+    - task: ManualValidation@1
+      timeoutInMinutes: 1440 #Timeout 1 day to validate deployemnt
+      inputs:
+        notifyUsers: ''
+        instructions: 'Please validate the deployment and approve to proceed with resource cleanup.'
+        onTimeout: 'reject'
+      displayName: Manual Validation
+
+- job: Destroy
+  condition: succeeded()
+  steps:
+
+    - bash: |
+        echo 'Hello World!'
