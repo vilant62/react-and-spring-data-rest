@@ -8,8 +8,7 @@ pool:
 
 variables:
   imageName: 'vilant/react-and-spring-rest'
-  containerGroupName: 'react-and-spring-rest-group'
-  containerName: 'react-and-spring-rest'
+  containerAppName: 'react-and-spring-rest'
   resourceGroup: 'rg-container-app'
   location: 'northeurope'
 
@@ -43,6 +42,20 @@ stages:
               scriptLocation: inlineScript
               inlineScript: |
                 az group create --name $(resourceGroup) --location $(location)
+
+          - task: AzureResourceManagerTemplateDeployment@3
+            displayName: Deploy Azure Bicep
+            inputs:
+              azureResourceManagerConnection: 'azureResourceConnection'
+              deploymentScope: Resource Group
+              resourceGroupName: $(resourceGroup)
+              action: Create Or Update Resource Group
+              location: $(location)
+              csmFile: bicep/main.bicep
+              overrideParameters: >
+                      -image $(imageName)
+                      -imageTag $(Build.BuildId)
+                      -appName $(containerAppName)
 
   - stage: Destroy
     displayName: Destroy test environment
