@@ -10,8 +10,8 @@ variables:
   imageName: 'vilant/react-and-spring-rest'
   containerGroupName: 'react-and-spring-rest-group'
   containerName: 'react-and-spring-rest'
-  resourceGroup: 'your-resource-group'
-  location: 'your-location'
+  resourceGroup: 'rg-container-app'
+  location: 'northeurope'
 
 stages:
   - stage: build
@@ -35,8 +35,14 @@ stages:
     jobs:
       - job: azureDeployment
         steps:
-        - bash: |
-            echo 'Deploy Bicep files'
+          - task: AzureCLI@2
+            displayName: Create Azure resource group
+            inputs:
+              azureSubscription: 'azureResourceConnection'
+              scriptType: bash
+              scriptLocation: inlineScript
+              inlineScript: |
+                az group create --name $(resourceGroup) --location $(location)
 
   - stage: Destroy
     displayName: Destroy test environment
@@ -44,5 +50,11 @@ stages:
     jobs:
       - job: azureDestroyResources
         steps:
-        - bash: |
-            echo 'Hello World!'
+          - task: AzureCLI@2
+            displayName: Create Azure resource group
+            inputs:
+              azureSubscription: 'azureResourceConnection'
+              scriptType: bash
+              scriptLocation: inlineScript
+              inlineScript: |
+                az group delete --name $(resourceGroup) --yes
