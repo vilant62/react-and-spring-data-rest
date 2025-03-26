@@ -14,17 +14,19 @@ jobs:
   steps:
     - task: Docker@2
       inputs:
-        containerRegistry: dockerRegistryServiceConnection
+        containerRegistry: 'dockerRegistryServiceConnection'
         repository: '$(imageName)'
-        command: buildAndPush
+        command: 'buildAndPush'
         Dockerfile: '**/Dockerfile'
         tags: |
           $(Build.BuildId)
           latest
+        addPipelineData: false
+        addBaseImageData: false
       displayName: Build Docker Image
 
 - job: Validation
-  condition: succeeded()
+  condition: succeeded('Build')
   pool: server
   steps:
     - task: ManualValidation@1
@@ -36,7 +38,7 @@ jobs:
       displayName: Manual Validation
 
 - job: Destroy
-  condition: succeeded()
+  condition: succeeded('Validation')
   steps:
 
     - bash: |
