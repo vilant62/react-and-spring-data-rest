@@ -8,38 +8,41 @@ pool:
 
 variables:
   imageName: 'vilant/react-and-spring-rest'
+  containerGroupName: 'react-and-spring-rest-group'
+  containerName: 'react-and-spring-rest'
+  resourceGroup: 'your-resource-group'
+  location: 'your-location'
 
-jobs:
-- job: Build
-  steps:
-    - task: Docker@2
-      inputs:
-        containerRegistry: 'dockerRegistryServiceConnection'
-        repository: '$(imageName)'
-        command: 'buildAndPush'
-        Dockerfile: '**/Dockerfile'
-        tags: |
-          $(Build.BuildId)
-          latest
-        addPipelineData: false
-        addBaseImageData: false
-      displayName: Build Docker Image
+stages:
+  - stage: build
+    displayName: Build Image
+    jobs:
+      - job: docker
+        steps:
+          - task: Docker@2
+            inputs:
+              containerRegistry: 'dockerRegistryServiceConnection'
+              repository: '$(imageName)'
+              command: 'buildAndPush'
+              Dockerfile: '**/Dockerfile'
+              tags: |
+                $(Build.BuildId)
+                latest
+              addPipelineData: false
 
-- job: Validation
-  dependsOn: Build
-  pool: server
-  steps:
-    - task: ManualValidation@1
-      timeoutInMinutes: 1440 #Timeout 1 day to validate deployemnt
-      inputs:
-        notifyUsers: ''
-        instructions: 'Please validate the deployment and approve to proceed with resource cleanup.'
-        onTimeout: 'reject'
-      displayName: Manual Validation
+  - stage: provisioning
+    displayName: Provisioning Azure Resources
+    jobs:
+      - job: azureDeployment
+        steps:
+        - bash: |
+            echo 'Deploy Bicep files'
 
-- job: Destroy
-  dependsOn: Validation
-  steps:
-
-    - bash: |
-        echo 'Hello World!'
+  - stage: Destroy
+    displayName: Destroy test environment
+    trigger: manual
+    jobs:
+      - job: azureDestroyResources
+        steps:
+        - bash: |
+            echo 'Hello World!'
