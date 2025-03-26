@@ -26,7 +26,7 @@ jobs:
       displayName: Build Docker Image
 
 - job: Validation
-  condition: succeeded('Build')
+  dependsOn: Build
   pool: server
   steps:
     - task: ManualValidation@1
@@ -38,7 +38,7 @@ jobs:
       displayName: Manual Validation
 
 - job: Destroy
-  condition: succeeded('Validation')
+  dependsOn: Validation
   steps:
 
     - bash: |
