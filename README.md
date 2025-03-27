@@ -26,4 +26,4 @@ To start the application you can just run (`java -jar target/react-and-spring-da
 
 ---
 
-To see the frontend, navigate to http://localhost:8080. You are immediately redirected to a login form. Log in as `greg/turnquist`
+To see the frontend, navigate to <http://localhost:8080>. You are immediately redirected to a login form. Log in as `greg/turnquist`

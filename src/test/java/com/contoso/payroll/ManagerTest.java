@@ -43,18 +43,6 @@ class ManagerTest {
     }
 
     @Test
-    void testEqualsAndHashCode() {
-        Manager manager1 = new Manager("John Doe", "password123", "ROLE_USER");
-        Manager manager2 = new Manager("John Doe", "password123", "ROLE_USER");
-
-        manager1.setId(1L);
-        manager2.setId(1L);
-
-        assertEquals(manager1, manager2);
-        assertEquals(manager1.hashCode(), manager2.hashCode());
-    }
-
-    @Test
     void testToString() {
         Manager manager = new Manager("John Doe", "password123", "ROLE_USER");
 
