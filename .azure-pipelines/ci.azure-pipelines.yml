@@ -1,0 +1,17 @@
+name: Pull requests pipeline
+
+pr:
+  branches:
+    include:
+      - main
+
+stages:
+  - stage: tests
+    displayName: Unit tests
+    jobs:
+      - job: utests
+        steps:
+          - task: Maven@4
+            inputs:
+              goals: test
+            displayName: mvn rest
