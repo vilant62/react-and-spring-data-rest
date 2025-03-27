@@ -3,6 +3,11 @@ name: BuildAndDeployApplication
 trigger:
   - main
 
+pr:
+  branches:
+    include:
+      - main
+
 pool:
   vmImage: 'ubuntu-22.04'
 
@@ -13,8 +18,19 @@ variables:
   location: 'northeurope'
 
 stages:
+  - stage: tests
+    displayName: Unit tests
+    condition: eq(variables['Build.Reason'], 'PullRequest')  # Run only for pull requests
+    jobs:
+      - job: utests
+        steps:
+          - task: Maven@4
+            inputs:
+              goals: test
+
   - stage: build
     displayName: Build Image
+    condition: eq(variables['Build.SourceBranch'], 'refs/heads/main')  # Run only for main branch
     jobs:
       - job: docker
         steps:
@@ -31,6 +47,7 @@ stages:
 
   - stage: provisioning
     displayName: Provisioning Azure Resources
+    condition: eq(variables['Build.SourceBranch'], 'refs/heads/main')  # Run only for main branch
     jobs:
       - job: azureDeployment
         steps:
@@ -59,12 +76,13 @@ stages:
 
   - stage: Destroy
     displayName: Destroy test environment
+    condition: eq(variables['Build.SourceBranch'], 'refs/heads/main')  # Run only for main branch
     trigger: manual
     jobs:
       - job: azureDestroyResources
         steps:
           - task: AzureCLI@2
-            displayName: Create Azure resource group
+            displayName: Delete Azure resource group
             inputs:
               azureSubscription: 'azureResourceConnection'
               scriptType: bash
