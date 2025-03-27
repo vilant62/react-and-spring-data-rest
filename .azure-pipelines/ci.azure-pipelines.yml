@@ -5,6 +5,11 @@ pr:
     include:
       - main
 
+trigger:
+  branches:
+    exclude:
+      - "*"
+
 stages:
   - stage: tests
     displayName: Unit tests
